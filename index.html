@@ -218,8 +218,10 @@
             }
 
             result.innerHTML = `
-                <div class="result-box">${escapeHtml(data.content)}</div>
-            `;
+    <div class="result-box">
+        ${escapeHtml(JSON.stringify(data, null, 2))}
+    </div>
+`;
 
         } catch (error) {
             result.innerHTML = `
