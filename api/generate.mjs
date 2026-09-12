@@ -1,38 +1,25 @@
-
-export default async function handler(request) {
+export default async function handler(request, response) {
     if (request.method !== "POST") {
-        return new Response(
-            JSON.stringify({ error: "Method not allowed" }),
-            {
-                status: 405,
-                headers: { "Content-Type": "application/json" }
-            }
-        );
+        return response.status(405).json({
+            error: "Method not allowed"
+        });
     }
 
     try {
-        const { idea, contentType } = await request.json();
+        const { idea, contentType } = request.body || {};
 
         if (!idea || !contentType) {
-            return new Response(
-                JSON.stringify({ error: "Idea and content type are required." }),
-                {
-                    status: 400,
-                    headers: { "Content-Type": "application/json" }
-                }
-            );
+            return response.status(400).json({
+                error: "Idea and content type are required."
+            });
         }
 
         const apiKey = process.env.OPENAI_API_KEY;
 
         if (!apiKey) {
-            return new Response(
-                JSON.stringify({ error: "AI service is not configured yet." }),
-                {
-                    status: 500,
-                    headers: { "Content-Type": "application/json" }
-                }
-            );
+            return response.status(500).json({
+                error: "AI service is not configured."
+            });
         }
 
         const prompt = `
@@ -49,7 +36,7 @@ Make the content engaging, natural, useful and ready to publish.
 Do not explain your process. Return only the finished content.
 `;
 
-        const response = await fetch(
+        const openaiResponse = await fetch(
             "https://api.openai.com/v1/responses",
             {
                 method: "POST",
@@ -64,43 +51,25 @@ Do not explain your process. Return only the finished content.
             }
         );
 
-        const data = await response.json();
+        const data = await openaiResponse.json();
 
-        if (!response.ok) {
+        if (!openaiResponse.ok) {
             console.error(data);
 
-            return new Response(
-                JSON.stringify({
-                    error: "The AI service returned an error."
-                }),
-                {
-                    status: response.status,
-                    headers: { "Content-Type": "application/json" }
-                }
-            );
+            return response.status(openaiResponse.status).json({
+                error: "The AI service returned an error."
+            });
         }
 
-        return new Response(
-            JSON.stringify({
-                content: data.output_text
-            }),
-            {
-                status: 200,
-                headers: { "Content-Type": "application/json" }
-            }
-        );
+        return response.status(200).json({
+            content: data.output_text
+        });
 
     } catch (error) {
         console.error(error);
 
-        return new Response(
-            JSON.stringify({
-                error: "Something went wrong while generating content."
-            }),
-            {
-                status: 500,
-                headers: { "Content-Type": "application/json" }
-            }
-        );
+        return response.status(500).json({
+            error: "Something went wrong while generating content."
+        });
     }
-              }
+}
