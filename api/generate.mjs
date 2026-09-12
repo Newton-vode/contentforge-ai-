@@ -61,10 +61,11 @@ Do not explain your process. Return only the finished content.
             });
         }
 
-    const content =
-    data.output?.[0]?.content?.find(
-        item => item.type === "output_text"
-    )?.text || "";
+const content =
+    data.output
+        ?.flatMap(item => item.content || [])
+        ?.find(item => item.type === "output_text")
+        ?.text || "";
 
 return response.status(200).json({
     content: content
