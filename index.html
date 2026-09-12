@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ContentForge AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #111827;
+        }
+
+        header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #6366f1;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 55px 20px 30px;
+        }
+
+        .hero h1 {
+            font-size: 38px;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            color: #6b7280;
+            font-size: 17px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 20px auto 60px;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            resize: vertical;
+            font-size: 16px;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #6366f1;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 15px;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: #6366f1;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #result {
+            margin-top: 20px;
+        }
+
+        .result-box {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 30px;
+            }
+        }select {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 16px;
+    background: white;
+}
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">Content<span>Forge</span> AI</div>
+</header>
+
+<section class="hero">
+    <h1>Create Better Content With AI</h1>
+    <p>Turn one simple idea into powerful content for your audience.</p>
+</section>
+
+<div class="container">
+
+    <div class="card">
+
+        <label for="idea">What do you want to create?</label>
+        <select id="contentType">
+    <option value="social">Social Media Post</option>
+    <option value="tiktok">TikTok Script</option>
+    <option value="youtube">YouTube Script</option>
+    <option value="instagram">Instagram Caption</option>
+    <option value="whatsapp">WhatsApp Advertisement</option>
+    <option value="email">Marketing Email</option>
+    <option value="product">Product Description</option>
+</select>
+
+        <textarea
+            id="idea"
+            placeholder="Example: I sell sneakers and I want to promote my new arrivals..."
+        ></textarea>
+
+        <button id="generateBtn">
+            ✨ Generate Content
+        </button>
+
+        <div id="result"></div>
+
+    </div>
+
+</div>
+<script>
+    const generateBtn = document.getElementById("generateBtn");
+    const idea = document.getElementById("idea");
+    const contentType = document.getElementById("contentType");
+    const result = document.getElementById("result");
+
+    generateBtn.addEventListener("click", async function () {
+        const userIdea = idea.value.trim();
+        const type = contentType.value;
+
+        if (!userIdea) {
+            result.innerHTML = `
+                <div class="result-box">
+                    Please enter an idea first.
+                </div>
+            `;
+            return;
+        }
+
+        generateBtn.disabled = true;
+        generateBtn.textContent = "✨ Generating...";
+
+        result.innerHTML = `
+            <div class="result-box">
+                Creating your content...
+            </div>
+        `;
+
+        try {
+            const response = await fetch("/api/generate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    idea: userIdea,
+                    contentType: type
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Something went wrong.");
+            }
+
+            result.innerHTML = `
+                <div class="result-box">${escapeHtml(data.content)}</div>
+            `;
+
+        } catch (error) {
+            result.innerHTML = `
+                <div class="result-box">
+                    ${escapeHtml(error.message)}
+                </div>
+            `;
+        } finally {
+            generateBtn.disabled = false;
+            generateBtn.textContent = "✨ Generate Content";
+        }
+    });
+
+    function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
+</body>
+</html>
