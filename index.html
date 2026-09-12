@@ -128,6 +128,22 @@
     font-size: 16px;
     background: white;
 }
+        .copy-btn {
+    width: 100%;
+    margin-top: 15px;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: #6366f1;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.copy-btn:active {
+    transform: scale(0.98);
+}
     </style>
 </head>
 
@@ -192,12 +208,32 @@
 
         generateBtn.disabled = true;
         generateBtn.textContent = "✨ Generating...";
+result.innerHTML = `
+    <div class="result-box">
+        <div id="generatedContent">${escapeHtml(data.content)}</div>
 
-        result.innerHTML = `
-            <div class="result-box">
-                Creating your content...
-            </div>
-        `;
+        <button id="copyBtn" class="copy-btn">
+            📋 Copy Content
+        </button>
+    </div>
+`;
+
+document.getElementById("copyBtn").addEventListener("click", async function () {
+    const content = document.getElementById("generatedContent").innerText;
+
+    try {
+        await navigator.clipboard.writeText(content);
+
+        this.textContent = "✅ Copied!";
+
+        setTimeout(() => {
+            this.textContent = "📋 Copy Content";
+        }, 2000);
+
+    } catch (error) {
+        this.textContent = "❌ Copy failed";
+    }
+});
 
         try {
             const response = await fetch("/api/generate", {
