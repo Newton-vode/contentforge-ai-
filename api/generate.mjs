@@ -61,9 +61,14 @@ Do not explain your process. Return only the finished content.
             });
         }
 
-        return response.status(200).json({
-            content: data.output_text
-        });
+    const content =
+    data.output?.[0]?.content?.find(
+        item => item.type === "output_text"
+    )?.text || "";
+
+return response.status(200).json({
+    content: content
+});
 
     } catch (error) {
         console.error(error);
